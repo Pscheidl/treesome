@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::ops::Index;
 
 const LEAF_NODE_MARK: isize = -1;
@@ -51,6 +52,7 @@ impl<T, const N: usize> BTree<T, N> {
     }
 
     pub fn parent(&self, node_id: isize) -> isize {
+        // TODO: Node may not have a parent or may not exist
         let parent_level = (node_id + 1).ilog2() - 1; // On which level the parent node is. Root is level 0.
         let level_start_idx = 2_isize.pow(parent_level) - 1; // Whe the parent's level start in the backing arrays
 
@@ -75,12 +77,74 @@ impl<T, const N: usize> Index<usize> for BTree<T, N> {
     }
 }
 
+/// Walks a binary node by node, back and forth. From root to leaf nodes.
+struct Walker<'a, T, const N: usize> {
+    tree: &'a BTree<T, N>,
+    curr_node_id: RefCell<isize>,
+}
+
+impl<'a, T, const N: usize> Walker<'a, T, N> {
+    pub fn for_tree(tree: &'a BTree<T, N>) -> Self {
+        Self {
+            tree,
+            curr_node_id: RefCell::new(0),
+        }
+    }
+
+    pub fn go_right(&self) -> Option<&T> {
+        let right_child_id = { self.tree.r_nodes[self.curr_node_id.take() as usize] };
+        if right_child_id != LEAF_NODE_MARK {
+            self.curr_node_id.replace(right_child_id);
+            Some(&self.tree[*self.curr_node_id.borrow() as usize])
+        } else {
+            None
+        }
+    }
+
+    pub fn go_left(&self) -> Option<&T> {
+        let left_child_id = self.tree.l_nodes[self.curr_node_id.take() as usize];
+        if left_child_id != LEAF_NODE_MARK {
+            self.curr_node_id.replace(left_child_id);
+            Some(&self.tree[*self.curr_node_id.borrow() as usize])
+        } else {
+            None
+        }
+    }
+
+    pub fn go_parent(&self) -> Option<&T> {
+        let current_node_id = self.curr_node_id.take();
+        //TODO: Node may not have a parent
+        let parent = self.tree.parent(current_node_id);
+        self.curr_node_id.replace(parent);
+        Some(&self.tree.values[parent as usize])
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::btree::BTree;
+    use crate::btree::{BTree, Walker};
 
     #[test]
     fn it_works() {}
+
+    #[test]
+    fn walker() {
+        let left = [1, 3, 5, -1, -1, -1, -1];
+        let right = [2, 4, 6, -1, -1, -1, -1];
+        let values = [10, 51, 36, 90, 32, 16, 5];
+        let tree = BTree::new(left, right, values);
+
+        let walker = Walker::for_tree(&tree);
+        let right_child = walker.go_right();
+        assert_eq!(right_child, Some(&tree.values[2]));
+
+        let left_child = walker.go_left();
+        assert_eq!(left_child, Some(&tree.values[5]));
+
+        // Go back to the root node's right child
+        let left_child = walker.go_parent();
+        assert_eq!(left_child, Some(&tree.values[2]));
+    }
 
     #[test]
     fn parent() {
