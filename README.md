@@ -1,4 +1,7 @@
 # Treesome
+[![Crates.io Version](https://img.shields.io/crates/v/treesome)](https://crates.io/crates/treesome)
+[![docs.rs (with version)](https://img.shields.io/docsrs/treesome/latest)](https://docs.rs/treesome/latest/treesome/)
+
 
 A playful library for tree
 
