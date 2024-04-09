@@ -76,7 +76,8 @@ impl<T, const N: usize> BTree<T, N> {
 
     /// Return's node_id of its parent, if it exists.
     /// If there's no parent (root node, non-existent node_id) for given node, `None` is returned.
-    ///
+    /// Computational complexity of the lookup is O(1), as the formula used calculates the exact
+    /// position of the parent node.
     /// # Examples
     ///
     /// ```
