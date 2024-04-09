@@ -76,7 +76,13 @@ impl<T, const N: usize> Index<usize> for BTree<T, N> {
     }
 }
 
-/// Walks a binary node by node, back and forth. From root to leaf nodes.
+/// Walks a binary node by node, back and forth. From root to leaf nodes, and back.
+///
+///
+/// ## Thread safety
+/// Not thread safe. Cheap to copy & clone, as this structure serves as a view to a tree with small
+/// state overhead.
+#[derive(Debug, Copy, Clone)]
 struct Walker<'a, T, const N: usize> {
     tree: &'a BTree<T, N>,
     curr_node_id: isize,
@@ -90,6 +96,7 @@ impl<'a, T, const N: usize> Walker<'a, T, N> {
         }
     }
 
+    /// Visits the right child of current node and returns its value, of it exists.
     pub fn go_right(&mut self) -> Option<&T> {
         let right_child_id = { self.tree.r_nodes[self.curr_node_id as usize] };
         if right_child_id != LEAF_NODE_MARK {
@@ -100,6 +107,7 @@ impl<'a, T, const N: usize> Walker<'a, T, N> {
         }
     }
 
+    /// Visits the left child of current node and returns its value, of it exists.
     pub fn go_left(&mut self) -> Option<&T> {
         let left_child_id = { self.tree.l_nodes[self.curr_node_id as usize] };
         if left_child_id != LEAF_NODE_MARK {
@@ -110,6 +118,7 @@ impl<'a, T, const N: usize> Walker<'a, T, N> {
         }
     }
 
+    /// Goes back to parent of the current node and returns its value, of it exists.
     pub fn go_parent(&mut self) -> Option<&T> {
         //TODO: Node may not have a parent
         let parent = self.tree.parent(self.curr_node_id);
