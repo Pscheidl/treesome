@@ -95,19 +95,9 @@ impl<T, const N: usize> BTree<T, N> {
         if node_id <= ROOT_NODE || node_id as usize >= self.values.len() {
             return None;
         }; // Root node doesn't have a parent.
-        let parent_level = (node_id + 1).checked_ilog2()? - 1; // On which level the parent node is. Root is level 0.
-        let level_start_idx = 2_isize.pow(parent_level) - 1; // Whe the parent's level start in the backing arrays
-
-        // The parent's index is starting offset of the tree's level where the parent resides + offset on that level.
-        // Offset on that level is calculated as follows:
-        // The `node_id value represents node's offset from the tree's root. By subtracting the amount of nodes before current level,
-        // the result `x` shows current node is `nth` from the beginning of the current level. As this is a binary tree, and there are exactly
-        // double the amount of nodes in each level, dividing `x` by `2` results in previous level's offset.
-        let nodes_before_current_level = 2_isize.pow(parent_level + 1) - 1; // How many nodes are there on levels below `node_id`'s level
-        let level_offset = (node_id - nodes_before_current_level) / 2;
 
         // Combine the level start with offset on that level gives exact coordinates
-        Some(level_start_idx + level_offset)
+        Some((node_id - 1) / 2)
     }
 }
 
