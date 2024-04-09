@@ -30,6 +30,17 @@ impl From<(isize, isize)> for Children {
 }
 
 impl<T, const N: usize> BTree<T, N> {
+    /// Constructs a new tree from array representation
+    ///
+    /// # Examples
+    ///
+    /// ```
+    ///         use treesome::btree::BTree;
+    ///         let left = [1, 3, 5, -1, -1, -1, -1];
+    ///         let right = [2, 4, 6, -1, -1, -1, -1];
+    ///         let values = [10, 51, 36, 90, 32, 16, 5];
+    ///         let tree = BTree::new(left, right, values);
+    /// ```
     pub fn new(l_nodes: [isize; N], r_nodes: [isize; N], values: [T; N]) -> Self {
         Self {
             l_nodes,
@@ -44,6 +55,18 @@ impl<T, const N: usize> BTree<T, N> {
     }
 
     /// Returns left and right child of a node. The value of `-1` means no child in that direction.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    ///         use treesome::btree::BTree;
+    ///         let left = [1, 3, 5, -1, -1, -1, -1];
+    ///         let right = [2, 4, 6, -1, -1, -1, -1];
+    ///         let values = [10, 51, 36, 90, 32, 16, 5];
+    ///         let tree = BTree::new(left, right, values);
+    ///         assert_eq!(tree.children(0), (1, 2).into());
+    ///
+    /// ```
     pub fn children(&self, node_id: usize) -> Children {
         Children {
             left: self.l_nodes[node_id],
@@ -52,7 +75,21 @@ impl<T, const N: usize> BTree<T, N> {
     }
 
     /// Return's node_id of its parent, if it exists.
-    /// If there's not parent (root node, non-existent node_id), `None` is returned.
+    /// If there's no parent (root node, non-existent node_id) for given node, `None` is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    ///         use treesome::btree::BTree;
+    ///         let left = [1, 3, 5, -1, -1, -1, -1];
+    ///         let right = [2, 4, 6, -1, -1, -1, -1];
+    ///         let values = [10, 51, 36, 90, 32, 16, 5];
+    ///         let tree = BTree::new(left, right, values);
+    ///
+    ///         assert_eq!(tree.parent(0), None);
+    ///         assert_eq!(tree.parent(3).unwrap(), 1);
+    ///
+    /// ```
     pub fn parent(&self, node_id: isize) -> Option<isize> {
         if node_id <= ROOT_NODE || node_id as usize >= self.values.len() {
             return None;
@@ -87,8 +124,23 @@ impl<T, const N: usize> Index<usize> for BTree<T, N> {
 /// ## Thread safety
 /// Not thread safe. Cheap to copy & clone, as this structure serves as a view to a tree with small
 /// state overhead.
+///
+/// ## Example
+///
+/// ```rust
+///        use treesome::btree::{BTree, Walker};
+/// let left = [1, 3, 5, -1, -1, -1, -1];
+///         let right = [2, 4, 6, -1, -1, -1, -1];
+///         let values = [10, 51, 36, 90, 32, 16, 5];
+///         let tree = BTree::new(left, right, values);
+///
+///         let mut walker = Walker::for_tree(&tree);
+///         let right_child = walker.go_right();
+///         assert_eq!(right_child, Some(&tree.values[2]));
+/// ```
+///
 #[derive(Debug, Copy, Clone)]
-struct Walker<'a, T, const N: usize> {
+pub struct Walker<'a, T, const N: usize> {
     tree: &'a BTree<T, N>,
     curr_node_id: isize,
 }
@@ -136,9 +188,6 @@ impl<'a, T, const N: usize> Walker<'a, T, N> {
 #[cfg(test)]
 mod tests {
     use crate::btree::{BTree, Walker, ROOT_NODE};
-
-    #[test]
-    fn it_works() {}
 
     #[test]
     fn walker() {
