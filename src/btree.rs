@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::ops::Index;
 
 const LEAF_NODE_MARK: isize = -1;
@@ -80,42 +79,41 @@ impl<T, const N: usize> Index<usize> for BTree<T, N> {
 /// Walks a binary node by node, back and forth. From root to leaf nodes.
 struct Walker<'a, T, const N: usize> {
     tree: &'a BTree<T, N>,
-    curr_node_id: RefCell<isize>,
+    curr_node_id: isize,
 }
 
 impl<'a, T, const N: usize> Walker<'a, T, N> {
     pub fn for_tree(tree: &'a BTree<T, N>) -> Self {
         Self {
             tree,
-            curr_node_id: RefCell::new(0),
+            curr_node_id: 0,
         }
     }
 
-    pub fn go_right(&self) -> Option<&T> {
-        let right_child_id = { self.tree.r_nodes[self.curr_node_id.take() as usize] };
+    pub fn go_right(&mut self) -> Option<&T> {
+        let right_child_id = { self.tree.r_nodes[self.curr_node_id as usize] };
         if right_child_id != LEAF_NODE_MARK {
-            self.curr_node_id.replace(right_child_id);
-            Some(&self.tree[*self.curr_node_id.borrow() as usize])
+            self.curr_node_id = right_child_id;
+            Some(&self.tree[right_child_id as usize])
         } else {
             None
         }
     }
 
-    pub fn go_left(&self) -> Option<&T> {
-        let left_child_id = self.tree.l_nodes[self.curr_node_id.take() as usize];
+    pub fn go_left(&mut self) -> Option<&T> {
+        let left_child_id = { self.tree.l_nodes[self.curr_node_id as usize] };
         if left_child_id != LEAF_NODE_MARK {
-            self.curr_node_id.replace(left_child_id);
-            Some(&self.tree[*self.curr_node_id.borrow() as usize])
+            self.curr_node_id = left_child_id;
+            Some(&self.tree[left_child_id as usize])
         } else {
             None
         }
     }
 
-    pub fn go_parent(&self) -> Option<&T> {
-        let current_node_id = self.curr_node_id.take();
+    pub fn go_parent(&mut self) -> Option<&T> {
         //TODO: Node may not have a parent
-        let parent = self.tree.parent(current_node_id);
-        self.curr_node_id.replace(parent);
+        let parent = self.tree.parent(self.curr_node_id);
+        self.curr_node_id = parent;
         Some(&self.tree.values[parent as usize])
     }
 }
@@ -134,7 +132,7 @@ mod tests {
         let values = [10, 51, 36, 90, 32, 16, 5];
         let tree = BTree::new(left, right, values);
 
-        let walker = Walker::for_tree(&tree);
+        let mut walker = Walker::for_tree(&tree);
         let right_child = walker.go_right();
         assert_eq!(right_child, Some(&tree.values[2]));
 
