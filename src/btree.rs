@@ -1,6 +1,7 @@
 use std::ops::Index;
 
 const LEAF_NODE_MARK: isize = -1;
+const ROOT_NODE: isize = 0;
 
 /// A binary tree representation for fast traversal, suitable for dense trees.
 /// Special implementation for binary tree is offered for faster traversal times over the generalized
@@ -50,9 +51,13 @@ impl<T, const N: usize> BTree<T, N> {
         }
     }
 
-    pub fn parent(&self, node_id: isize) -> isize {
-        // TODO: Node may not have a parent or may not exist
-        let parent_level = (node_id + 1).ilog2() - 1; // On which level the parent node is. Root is level 0.
+    /// Return's node_id of its parent, if it exists.
+    /// If there's not parent (root node, non-existent node_id), `None` is returned.
+    pub fn parent(&self, node_id: isize) -> Option<isize> {
+        if node_id <= ROOT_NODE || node_id as usize >= self.values.len() {
+            return None;
+        }; // Root node doesn't have a parent.
+        let parent_level = (node_id + 1).checked_ilog2()? - 1; // On which level the parent node is. Root is level 0.
         let level_start_idx = 2_isize.pow(parent_level) - 1; // Whe the parent's level start in the backing arrays
 
         // The parent's index is starting offset of the tree's level where the parent resides + offset on that level.
@@ -64,7 +69,7 @@ impl<T, const N: usize> BTree<T, N> {
         let level_offset = (node_id - nodes_before_current_level) / 2;
 
         // Combine the level start with offset on that level gives exact coordinates
-        level_start_idx + level_offset
+        Some(level_start_idx + level_offset)
     }
 }
 
@@ -118,10 +123,11 @@ impl<'a, T, const N: usize> Walker<'a, T, N> {
         }
     }
 
-    /// Goes back to parent of the current node and returns its value, of it exists.
+    /// Goes back to parent of the current node and returns its value, if it exists.
+    /// Stays on current position and returns `None` if there's no parent.
+    /// Root nodes and nodes out of bounds have no parents.
     pub fn go_parent(&mut self) -> Option<&T> {
-        //TODO: Node may not have a parent
-        let parent = self.tree.parent(self.curr_node_id);
+        let parent = self.tree.parent(self.curr_node_id)?;
         self.curr_node_id = parent;
         Some(&self.tree.values[parent as usize])
     }
@@ -129,7 +135,7 @@ impl<'a, T, const N: usize> Walker<'a, T, N> {
 
 #[cfg(test)]
 mod tests {
-    use crate::btree::{BTree, Walker};
+    use crate::btree::{BTree, Walker, ROOT_NODE};
 
     #[test]
     fn it_works() {}
@@ -160,16 +166,18 @@ mod tests {
         let values = [10, 51, 36, 90, 32, 16, 5];
         let tree = BTree::new(left, right, values);
 
-        assert_eq!(tree.parent(3), 1);
-        assert_eq!(tree.parent(4), 1);
-        assert_eq!(tree.parent(5), 2);
-        assert_eq!(tree.parent(6), 2);
-        // Works even if out of bounds, the result is based on mere calculation, the function doesn't
-        // do a bound check to ensure fast tree traversal times. The caller is responsible for providing
-        // a node_id actually present in the tree.
-        assert_eq!(tree.parent(7), 3);
-        assert_eq!(tree.parent(8), 3);
-        assert_eq!(tree.parent(9), 4);
+        // Root's parent
+        assert_eq!(tree.parent(0), None);
+
+        // Overflow - nonexistent node
+        assert_eq!(tree.parent(values.len() as isize), None);
+
+        // Valid use cases
+        assert_eq!(tree.parent(1).unwrap(), ROOT_NODE);
+        assert_eq!(tree.parent(3).unwrap(), 1);
+        assert_eq!(tree.parent(4).unwrap(), 1);
+        assert_eq!(tree.parent(5).unwrap(), 2);
+        assert_eq!(tree.parent(6).unwrap(), 2);
     }
 
     #[test]
