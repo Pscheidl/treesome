@@ -8,9 +8,12 @@ A playful library for tree
 1. creation,
 2. traversal,
 3. manipulation,
-4. visualization.
+4. serialization and deserialization,
+5. visualization.
 
 (alpha stage, just started playing with this)
+
+Offers precisely sized binary (`Btree`) and generalized n-ary tree (`Tree`) structures. Serde is supported.
 
 :musical_note: (_ignore if you don't understand the language or the jargon_)
 
