@@ -93,10 +93,9 @@ impl<T, const N: usize> BTree<T, N> {
     /// ```
     pub fn parent(&self, node_id: isize) -> Option<isize> {
         if node_id <= ROOT_NODE || node_id as usize >= self.values.len() {
-            return None;
-        }; // Root node doesn't have a parent.
+            return None; // Root node doesn't have a parent.
+        };
 
-        // Combine the level start with offset on that level gives exact coordinates
         Some((node_id - 1) / 2)
     }
 }
