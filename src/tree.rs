@@ -1,7 +1,9 @@
-use crate::structs::Array;
+use std::ops::Index;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::ops::Index;
+
+use crate::structs::Array;
 
 pub const LEAF_NODE: isize = -1;
 pub const ROOT_NODE: isize = 0;
@@ -16,8 +18,26 @@ pub struct Tree<T, const M: usize, const N: usize> {
 }
 
 impl<T, const M: usize, const N: usize> Tree<T, M, N> {
+    pub fn from_arrays(nodes: Array<Array<isize, N>, M>, values: Array<T, N>) -> Self {
+        Self { nodes, values }
+    }
     pub fn new(nodes: [[isize; N]; M], values: [T; N]) -> Self {
-        Self { nodes, values } // TODO: Write the conversion
+        let node_indices: Vec<Array<isize, N>> = nodes
+            .into_iter()
+            .map(|node| {
+                let arr: Array<isize, N> = node.into();
+                arr
+            })
+            .collect();
+        let node_indices_array: [Array<isize, N>; M] =
+            node_indices.try_into().unwrap_or_else(|_| {
+                unreachable!("Input size is guaranteed by constant generic args <M,N>")
+            });
+        let array_of_nodes: Array<Array<isize, N>, M> = node_indices_array.into();
+        Self {
+            nodes: array_of_nodes,
+            values: values.into(),
+        }
     }
 
     /// True if given `node_id` is a leaf node (no children), false otherwise.
@@ -127,5 +147,18 @@ mod tests {
         let tree = Tree::new([left, mid, right], values);
         assert_eq!(tree[0], 1);
         assert_eq!(tree[3], 4);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serde() {
+        let left = [1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
+        let mid = [2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
+        let right = [3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
+        let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        let tree = Tree::new([left, mid, right], values);
+        let string_repr = serde_json::to_string(&tree).unwrap();
+        let deserialized_tree = serde_json::from_str::<Tree<i32, 3, 12>>(&string_repr).unwrap();
+        assert_eq!(tree, deserialized_tree);
     }
 }
