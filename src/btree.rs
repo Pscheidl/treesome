@@ -1,5 +1,10 @@
 use std::ops::Index;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+use crate::structs::Array;
+
 const LEAF_NODE_MARK: isize = -1;
 const ROOT_NODE: isize = 0;
 
@@ -7,10 +12,11 @@ const ROOT_NODE: isize = 0;
 /// Special implementation for binary tree is offered for faster traversal times over the generalized
 /// `k` tree, where an array of arrays and indices checks happen.
 #[derive(Eq, PartialEq, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BTree<T, const N: usize> {
-    pub l_nodes: [isize; N],
-    pub r_nodes: [isize; N],
-    pub values: [T; N],
+    pub l_nodes: Array<isize, N>,
+    pub r_nodes: Array<isize, N>,
+    pub values: Array<T, N>,
 }
 
 // Node's children ids
@@ -43,9 +49,9 @@ impl<T, const N: usize> BTree<T, N> {
     /// ```
     pub fn new(l_nodes: [isize; N], r_nodes: [isize; N], values: [T; N]) -> Self {
         Self {
-            l_nodes,
-            r_nodes,
-            values,
+            l_nodes: l_nodes.into(),
+            r_nodes: r_nodes.into(),
+            values: values.into(),
         }
     }
 
@@ -248,5 +254,17 @@ mod tests {
         let tree = BTree::new(left, right, values);
         assert_eq!(tree[0], 10);
         assert_eq!(tree[3], 90);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serde() {
+        let left = [1, 3, 5, -1, -1, -1, -1];
+        let right = [2, 4, 6, -1, -1, -1, -1];
+        let values = [10, 51, 36, 90, 32, 16, 5];
+        let tree = BTree::new(left, right, values);
+        let string_repr = serde_json::to_string(&tree).unwrap();
+        let deserialized_tree = serde_json::from_str::<BTree<i32, 7>>(&string_repr).unwrap();
+        assert_eq!(tree, deserialized_tree);
     }
 }
