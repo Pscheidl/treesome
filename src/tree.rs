@@ -1,3 +1,6 @@
+use crate::structs::Array;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::ops::Index;
 
 pub const LEAF_NODE: isize = -1;
@@ -5,14 +8,16 @@ pub const ROOT_NODE: isize = 0;
 
 /// N-ary tree, using an array representation of nodes and edges internally. Suitable for dense graphs
 /// and fast serialization/deserialization.
+#[derive(Eq, PartialEq, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Tree<T, const M: usize, const N: usize> {
-    nodes: [[isize; N]; M],
-    values: [T; N],
+    nodes: Array<Array<isize, N>, M>,
+    values: Array<T, N>,
 }
 
 impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     pub fn new(nodes: [[isize; N]; M], values: [T; N]) -> Self {
-        Self { nodes, values }
+        Self { nodes, values } // TODO: Write the conversion
     }
 
     /// True if given `node_id` is a leaf node (no children), false otherwise.
