@@ -3,7 +3,7 @@ use std::ops::Index;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::structs::Array;
+use crate::sized::structs::Array;
 
 const LEAF_NODE_MARK: isize = -1;
 const ROOT_NODE: isize = 0;
@@ -41,7 +41,7 @@ impl<T, const N: usize> BTree<T, N> {
     /// # Examples
     ///
     /// ```
-    ///         use treesome::btree::BTree;
+    ///         use treesome::sized::BTree;
     ///         let left = [1, 3, 5, -1, -1, -1, -1];
     ///         let right = [2, 4, 6, -1, -1, -1, -1];
     ///         let values = [10, 51, 36, 90, 32, 16, 5];
@@ -65,7 +65,7 @@ impl<T, const N: usize> BTree<T, N> {
     /// # Examples
     ///
     /// ```
-    ///         use treesome::btree::BTree;
+    ///         use treesome::sized::BTree;
     ///         let left = [1, 3, 5, -1, -1, -1, -1];
     ///         let right = [2, 4, 6, -1, -1, -1, -1];
     ///         let values = [10, 51, 36, 90, 32, 16, 5];
@@ -87,7 +87,7 @@ impl<T, const N: usize> BTree<T, N> {
     /// # Examples
     ///
     /// ```
-    ///         use treesome::btree::BTree;
+    ///         use treesome::sized::BTree;
     ///         let left = [1, 3, 5, -1, -1, -1, -1];
     ///         let right = [2, 4, 6, -1, -1, -1, -1];
     ///         let values = [10, 51, 36, 90, 32, 16, 5];
@@ -124,7 +124,7 @@ impl<T, const N: usize> Index<usize> for BTree<T, N> {
 /// ## Example
 ///
 /// ```rust
-///        use treesome::btree::{BTree, Walker};
+///        use treesome::sized::{BTree, Walker};
 /// let left = [1, 3, 5, -1, -1, -1, -1];
 ///         let right = [2, 4, 6, -1, -1, -1, -1];
 ///         let values = [10, 51, 36, 90, 32, 16, 5];
@@ -183,7 +183,7 @@ impl<'a, T, const N: usize> Walker<'a, T, N> {
 
 #[cfg(test)]
 mod tests {
-    use crate::btree::{BTree, Walker, ROOT_NODE};
+    use crate::sized::{BTree, Walker, ROOT_NODE};
 
     #[test]
     fn walker() {

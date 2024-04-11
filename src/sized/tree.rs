@@ -3,7 +3,7 @@ use std::ops::Index;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::structs::Array;
+use crate::sized::structs::Array;
 
 pub const LEAF_NODE: isize = -1;
 pub const ROOT_NODE: isize = 0;
@@ -47,7 +47,7 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     /// # Examples
     ///
     /// ```
-    ///         use treesome::Tree;
+    ///         use treesome::sized::Tree;
     ///         let left = [1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let mid = [2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let right = [3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
@@ -70,7 +70,7 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     /// # Examples
     ///
     /// ```
-    ///         use treesome::Tree;
+    ///         use treesome::sized::Tree;
     ///         let left = [1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let mid = [2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let right = [3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
@@ -95,7 +95,7 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     /// # Examples
     ///
     /// ```
-    ///        use treesome::{ROOT_NODE, Tree};
+    ///        use treesome::sized::{ROOT_NODE, Tree};
     ///        let left = [1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
     ///        let mid = [2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
     ///        let right = [3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
@@ -136,7 +136,7 @@ impl<T, const M: usize, const N: usize> Index<usize> for Tree<T, M, N> {
 
 #[cfg(test)]
 mod tests {
-    use crate::tree::Tree;
+    use crate::sized::Tree;
 
     #[test]
     fn index() {
