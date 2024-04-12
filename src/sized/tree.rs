@@ -113,7 +113,6 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     ///         assert_eq!(tree.parent(7).unwrap(), 2);
     ///         assert_eq!(tree.parent(9).unwrap(), 2);
     ///         assert_eq!(tree.parent(10).unwrap(), 3);
-
     /// ```
     pub fn parent(&self, node_id: isize) -> Option<isize> {
         if node_id <= ROOT_NODE || node_id as usize >= self.values.len() {
