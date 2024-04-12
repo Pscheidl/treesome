@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::sized::{LEAF_NODE, ROOT_NODE};
 use crate::tree::TreeError::CorruptedTree;
 
@@ -6,6 +9,8 @@ pub enum TreeError {
     CorruptedTree(String),
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Tree<T> {
     nodes: Vec<Vec<isize>>,
     values: Vec<T>,
@@ -125,5 +130,18 @@ mod tests {
         if err.is_ok() {
             panic!("Tree structure validation shouldn't have passed due to input length error.")
         }
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serde() {
+        let left = vec![1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
+        let mid = vec![2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
+        let right = vec![3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
+        let values = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        let tree = Tree::new(vec![left, mid, right], values).expect("Tree has a valid structure");
+        let string_repr = serde_json::to_string(&tree).unwrap();
+        let deserialized_tree: Tree<i32> = serde_json::from_str(&string_repr).unwrap();
+        assert_eq!(tree, deserialized_tree);
     }
 }
