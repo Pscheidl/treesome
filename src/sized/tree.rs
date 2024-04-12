@@ -3,7 +3,7 @@ use std::ops::Index;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::structs::Array;
+use crate::sized::structs::Array;
 
 pub const LEAF_NODE: isize = -1;
 pub const ROOT_NODE: isize = 0;
@@ -47,7 +47,7 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     /// # Examples
     ///
     /// ```
-    ///         use treesome::Tree;
+    ///         use treesome::sized::Tree;
     ///         let left = [1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let mid = [2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let right = [3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
@@ -57,12 +57,10 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     ///         assert!(tree.is_leaf_node(4));
     /// ```
     pub fn is_leaf_node(&self, node_id: usize) -> bool {
-        for (m, _) in self.nodes.iter().enumerate() {
-            if self.nodes[m][node_id] == LEAF_NODE {
-                return true;
-            }
-        }
-        false
+        self.nodes
+            .iter()
+            .enumerate()
+            .all(|(m, _)| self.nodes[m][node_id] == LEAF_NODE)
     }
 
     /// Returns an array of size [M] with node's children indices, or [LEAF_NODE] as a placeholder for every missing child.
@@ -70,7 +68,7 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     /// # Examples
     ///
     /// ```
-    ///         use treesome::Tree;
+    ///         use treesome::sized::Tree;
     ///         let left = [1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let mid = [2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
     ///         let right = [3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
@@ -95,7 +93,7 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     /// # Examples
     ///
     /// ```
-    ///        use treesome::{ROOT_NODE, Tree};
+    ///        use treesome::sized::{ROOT_NODE, Tree};
     ///        let left = [1, 4, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1];
     ///        let mid = [2, 5, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1];
     ///        let right = [3, 6, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1];
@@ -115,7 +113,6 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     ///         assert_eq!(tree.parent(7).unwrap(), 2);
     ///         assert_eq!(tree.parent(9).unwrap(), 2);
     ///         assert_eq!(tree.parent(10).unwrap(), 3);
-
     /// ```
     pub fn parent(&self, node_id: isize) -> Option<isize> {
         if node_id <= ROOT_NODE || node_id as usize >= self.values.len() {
@@ -136,7 +133,7 @@ impl<T, const M: usize, const N: usize> Index<usize> for Tree<T, M, N> {
 
 #[cfg(test)]
 mod tests {
-    use crate::tree::Tree;
+    use crate::sized::Tree;
 
     #[test]
     fn index() {
