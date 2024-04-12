@@ -57,12 +57,10 @@ impl<T, const M: usize, const N: usize> Tree<T, M, N> {
     ///         assert!(tree.is_leaf_node(4));
     /// ```
     pub fn is_leaf_node(&self, node_id: usize) -> bool {
-        for (m, _) in self.nodes.iter().enumerate() {
-            if self.nodes[m][node_id] == LEAF_NODE {
-                return true;
-            }
-        }
-        false
+        self.nodes
+            .iter()
+            .enumerate()
+            .all(|(m, _)| self.nodes[m][node_id] == LEAF_NODE)
     }
 
     /// Returns an array of size [M] with node's children indices, or [LEAF_NODE] as a placeholder for every missing child.
