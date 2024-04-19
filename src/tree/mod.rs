@@ -9,6 +9,7 @@ pub enum TreeError {
     CorruptedTree(String),
 }
 
+/// Dynamically sized dense tree.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Tree<T> {

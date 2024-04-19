@@ -8,7 +8,7 @@ use crate::sized::structs::Array;
 const LEAF_NODE_MARK: isize = -1;
 const ROOT_NODE: isize = 0;
 
-/// A binary tree representation for fast traversal, suitable for dense trees.
+/// Statically sized binary tree representation for fast traversal, suitable for dense trees.
 /// Special implementation for binary tree is offered for faster traversal times over the generalized
 /// `k` tree, where an array of arrays and indices checks happen.
 #[derive(Eq, PartialEq, Debug)]

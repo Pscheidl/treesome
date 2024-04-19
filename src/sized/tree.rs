@@ -8,7 +8,7 @@ use crate::sized::structs::Array;
 pub const LEAF_NODE: isize = -1;
 pub const ROOT_NODE: isize = 0;
 
-/// N-ary tree, using an array representation of nodes and edges internally. Suitable for dense graphs
+/// Statically sized n-ary tree, using an array representation of nodes and edges internally. Suitable for dense graphs
 /// and fast serialization/deserialization.
 #[derive(Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
