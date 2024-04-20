@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// adding interior mutability to reference-counted nodes, which would lead to runtime interior mutability checks on
 /// every node interaction.
 ///
-/// Node deletion can be achived by:
+/// Node deletion can be achieved by:
 /// a) Traversing the whole tree while creating a new one with selected nodes only, dropping the old tree if necessary, or
 /// b) Delay child node insertion during tree creation until 100% sure the node should be part of the graph.
 ///
